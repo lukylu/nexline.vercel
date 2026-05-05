@@ -1,0 +1,32 @@
+<!-- ══ CART ══ -->
+<div class="co" id="co" [class.open]="isOpen()" (click)="close()"></div>
+<div class="cd" id="cd" [class.open]="isOpen()">
+  <div class="cd-head">
+    <h3>CARRITO</h3>
+    <button class="cd-close" (click)="close()" aria-label="Cerrar carrito">✕</button>
+  </div>
+  <div class="cd-items" id="cdItems">
+    @if (cartService.items().length === 0) {
+      <p style="font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.2em;text-align:center;margin-top:3rem;text-transform:uppercase;">— vacío —</p>
+    } @else {
+      @for (item of cartService.items(); track item.id + item.size) {
+        <div class="cd-item">
+          <img [src]="item.img" [alt]="item.name" class="cd-item-img">
+          <div class="cd-item-info">
+            <h4 class="cd-item-name">{{ item.name }}</h4>
+            <p class="cd-item-size">Talla: {{ item.size || 'Única' }}</p>
+            <div class="cd-item-price">{{ item.price }}€</div>
+            <div class="cd-qty">
+              <span class="cd-qty-num">{{ item.qty }}</span>
+            </div>
+          </div>
+          <button class="cd-item-remove" (click)="cartService.removeFromCart(item.id, item.size!)">✕</button>
+        </div>
+      }
+    }
+  </div>
+  <div class="cd-foot">
+    <div class="cd-total"><span>Total</span><span class="cd-total-amt" id="cdTotal">{{ cartService.total() | number:'1.2-2' }} €</span></div>
+    <button class="chk-btn" (click)="openCheckout()"><span>Finalizar compra →</span></button>
+  </div>
+</div>

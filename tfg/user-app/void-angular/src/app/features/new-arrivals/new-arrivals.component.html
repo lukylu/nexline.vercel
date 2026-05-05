@@ -1,0 +1,14 @@
+<!-- NEW ARRIVALS -->
+<div id="newArrivals">
+  <div class="sec-head reveal">
+    <div class="sec-title-wrap">
+      <span class="sec-meta">// ÚLTIMO DROP</span>
+      <h2 class="sec-title" style="color:var(--lime);">NEW <em>ARRIVALS</em></h2>
+    </div>
+  </div>
+  <div class="pgrid" id="naGrid">
+    @for (product of productService.newArrivals(); track product.id) {
+      <void-product-card [product]="product"></void-product-card>
+    }
+  </div>
+</div>

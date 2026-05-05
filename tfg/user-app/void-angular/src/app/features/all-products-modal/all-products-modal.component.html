@@ -1,0 +1,47 @@
+<!-- ALL PRODUCTS MODAL -->
+<div class="popup-overlay" [class.open]="isOpen()" (click)="close()"></div>
+<div class="popup-box-full" [class.open]="isOpen()" id="allProductsBox">
+  <button class="modal-close-btn" (click)="close()" aria-label="Cerrar catálogo">✕</button>
+  
+  <header class="modal-header">
+    <div class="modal-header-top">
+      <div class="sec-title-wrap">
+        <span class="sec-meta">// CATÁLOGO COMPLETO</span>
+        <h2 class="sec-title">TODOS LOS <em>PRODUCTOS</em></h2>
+      </div>
+    </div>
+    
+    <div class="modal-tools">
+      <div class="modal-search-wrap">
+        <span class="modal-search-icon">🔍</span>
+        <input type="text" class="modal-search" placeholder="Buscar productos..." (input)="onSearch($event)">
+      </div>
+      
+      <div class="modal-filters">
+        <button class="mf-btn" [class.active]="categoryFilter() === 'all'" (click)="setCategory('all')">Todo</button>
+        <button class="mf-btn" [class.active]="categoryFilter() === 'hoodies'" (click)="setCategory('hoodies')">Hoodies</button>
+        <button class="mf-btn" [class.active]="categoryFilter() === 'tees'" (click)="setCategory('tees')">Tees</button>
+        <button class="mf-btn" [class.active]="categoryFilter() === 'jackets'" (click)="setCategory('jackets')">Cazadoras</button>
+        <button class="mf-btn" [class.active]="categoryFilter() === 'sneakers'" (click)="setCategory('sneakers')">Zapatillas</button>
+      </div>
+      
+      <div class="modal-sort-wrap">
+        <select class="modal-sort" (change)="onSortChange($event)">
+          <option value="newest">Más recientes</option>
+          <option value="price-low">Precio: Menor a mayor</option>
+          <option value="price-high">Precio: Mayor a menor</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="modal-count">{{ filteredProducts().length }} PRODUCTOS ENCONTRADOS</div>
+  </header>
+
+  <div class="modal-body">
+    <div class="pgrid expanded">
+      @for (product of filteredProducts(); track product.id) {
+        <void-product-card [product]="product"></void-product-card>
+      }
+    </div>
+  </div>
+</div>

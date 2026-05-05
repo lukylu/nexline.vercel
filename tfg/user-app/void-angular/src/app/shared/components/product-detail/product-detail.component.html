@@ -1,0 +1,68 @@
+<!-- ══ PRODUCT DETAIL POPUP ══ -->
+<div class="popup-overlay" [class.open]="isOpen()" (click)="close()" style="z-index: 99998;"></div>
+<div class="popup-box" [class.open]="isOpen()" style="z-index: 99999;">
+  @if (product()) {
+    <div class="popup-inner">
+      <!-- Gallery -->
+      <div class="popup-gallery">
+        <div class="popup-main-img-wrap">
+          <img class="popup-img" [src]="currentImg()" [alt]="product()!.name">
+          @if (product()!.badge) {
+            <span class="popup-badge" [class.b-new]="product()!.badge === 'NEW'" [class.b-sold]="product()!.badge === 'SOLD'" [class.b-hot]="product()!.badge === 'HOT'">{{ product()!.badge }}</span>
+          }
+          <button class="popup-close" (click)="close()" aria-label="Cerrar detalle de producto">✕</button>
+        </div>
+        <div class="popup-thumbs">
+          @for (img of images(); track $index) {
+            <div class="popup-thumb" [class.active]="currentImg() === img" (click)="setImg(img)" (mouseenter)="setImg(img)">
+              <img [src]="img" [alt]="product()!.name" loading="lazy">
+            </div>
+          }
+        </div>
+      </div>
+      <!-- Content -->
+      <div class="popup-content">
+        <div>
+          <p class="popup-tag">VOID / SS25</p>
+          <h2 class="popup-name">{{ product()!.name }} <span *ngIf="product()!.color" style="font-size:12px; opacity:0.5; margin-left:10px; font-weight:400;">{{ product()!.color }}</span></h2>
+          <p class="popup-sub">{{ product()!.sub }}</p>
+          <div class="popup-price">
+            @if (product()!.old_price) {
+              <span class="old">{{ product()!.old_price }}€</span>
+            }
+            <span [class.sale]="product()!.old_price">{{ product()!.price }}€</span>
+          </div>
+          
+          <div class="popup-size-label">
+            <span>Selecciona talla</span>
+            <button class="size-guide-trigger" (click)="showSizeGuide.set(!showSizeGuide())"><span>📐 Size Guide</span></button>
+          </div>
+          
+          <!-- Inline Size Guide Panel -->
+          <div class="size-guide-panel" [class.open]="showSizeGuide()">
+            <table>
+              <thead><tr><th>Talla</th><th>Pecho</th><th>Cintura</th><th>Cadera</th></tr></thead>
+              <tbody>
+                <tr><td>S</td><td>88–92 cm</td><td>72–76 cm</td><td>92–96 cm</td></tr>
+                <tr><td>M</td><td>92–98 cm</td><td>76–82 cm</td><td>96–102 cm</td></tr>
+                <tr><td>L</td><td>98–104 cm</td><td>82–88 cm</td><td>102–108 cm</td></tr>
+                <tr><td>XL</td><td>104–112 cm</td><td>88–96 cm</td><td>108–116 cm</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="popup-sizes">
+            @for (size of product()!.sizes; track size) {
+              <button class="psz" [class.selected]="selectedSize() === size" (click)="selectedSize.set(size)">{{ size }}</button>
+            }
+          </div>
+        </div>
+        <div>
+          <button class="popup-add" (click)="addToCart()">
+            <span>{{ isSoldOut() ? 'AGOTADO' : '+ Añadir al carrito' }}</span>
+          </button>
+          <button class="popup-wish" (click)="toggleWishlist()">{{ isInWishlist() ? '♥ En tu wishlist' : '♡ Guardar en wishlist' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

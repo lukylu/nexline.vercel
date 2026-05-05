@@ -1,0 +1,20 @@
+<!-- ALL PRODUCTS CAROUSEL -->
+<div id="products">
+  <div class="sec-head reveal" style="align-items:flex-end;">
+    <div class="sec-title-wrap">
+      <span class="sec-meta">// CATÁLOGO SS25</span>
+      <h2 class="sec-title">COLECCIÓN <em>COMPLETA</em></h2>
+    </div>
+    <button class="hero-cta" (click)="openAllProductsModal()"><span class="hci">VER TODO ↗</span></button>
+  </div>
+  
+  <div class="carousel-container" style="position:relative;">
+    <button class="car-arrow prev" aria-label="Anterior" (click)="scrollCar(-1)">←</button>
+    <div class="pgrid carousel-view" id="pgrid-carousel">
+      @for (product of productService.uniqueProducts(); track product.id) {
+        <void-product-card [product]="product"></void-product-card>
+      }
+    </div>
+    <button class="car-arrow next" aria-label="Siguiente" (click)="scrollCar(1)">→</button>
+  </div>
+</div>

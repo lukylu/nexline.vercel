@@ -1,0 +1,14 @@
+<!-- BEST SELLERS -->
+<div id="bestSellers" style="margin-top:2rem;">
+  <div class="sec-head reveal">
+    <div class="sec-title-wrap">
+      <span class="sec-meta">// LOS MÁS BUSCADOS</span>
+      <h2 class="sec-title">BEST <em>SELLERS</em></h2>
+    </div>
+  </div>
+  <div class="pgrid" id="bsGrid">
+    @for (product of productService.bestSellers(); track product.id) {
+      <void-product-card [product]="product"></void-product-card>
+    }
+  </div>
+</div>

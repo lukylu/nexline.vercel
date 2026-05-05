@@ -1,0 +1,21 @@
+<!-- WISHLIST MODAL -->
+<div class="popup-overlay" [class.open]="isOpen()" (click)="close()"></div>
+<div class="popup-box" [class.open]="isOpen()" style="max-width:720px;">
+  <div class="popup-content" style="width:100%;padding:2rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="popup-name" style="font-size:1.8rem;">MI WISHLIST</h2>
+      <button class="popup-close" (click)="close()">✕</button>
+    </div>
+    <div id="wishlistItems">
+      @if (wishlistItems().length === 0) {
+        <p style="font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.2em;text-align:center;margin-top:3rem;text-transform:uppercase;">— tu wishlist está vacía —</p>
+      } @else {
+        <div class="pgrid" style="grid-template-columns: repeat(2, 1fr);">
+          @for (product of wishlistItems(); track product.id) {
+            <void-product-card [product]="product"></void-product-card>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

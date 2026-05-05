@@ -1,0 +1,12 @@
+<div class="mob-menu" [class.open]="isOpen()">
+  <a routerLink="/" fragment="products" (click)="closeMenu()">Colección</a>
+  <a routerLink="/" fragment="cats" (click)="closeMenu()">Categorías</a>
+  <a routerLink="/" (click)="closeMenu()">Drops</a>
+  <a routerLink="/" (click)="closeMenu()">Nosotros</a>
+  <button class="mob-cart-btn" (click)="openCart()">Carrito (<span>{{ cartService.count() }}</span>)</button>
+  @if (!authService.isLoggedIn()) {
+    <button class="mob-cart-btn" id="mobAuthBtn" (click)="openAuth()" style="background:none;border:1px solid rgba(255,255,255,.15);color:var(--muted);margin-top:-.5rem;">Iniciar sesión</button>
+  } @else {
+    <button class="mob-cart-btn" id="mobAuthBtn" (click)="closeMenu(); modalService.open('user')" style="background:none;border:1px solid rgba(255,255,255,.15);color:var(--muted);margin-top:-.5rem;">Mi Cuenta</button>
+  }
+</div>

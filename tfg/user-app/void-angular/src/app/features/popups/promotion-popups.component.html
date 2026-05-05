@@ -1,0 +1,33 @@
+<!-- ══ POPUP 1: NEWSLETTER ENTRY ══ -->
+@if (showNewsletter()) {
+  <div class="nl-popup-overlay open" (click)="closeNewsletter()"></div>
+  <div class="nl-popup open">
+    <div class="nl-popup-top"></div>
+    <div class="nl-popup-body">
+      <button class="nl-popup-close" (click)="closeNewsletter()" aria-label="Cerrar oferta newsletter">✕</button>
+      <p class="nl-popup-tag">Oferta exclusiva</p>
+      <h2 class="nl-popup-title">−15% EN<br>TU <span>PRIMER</span><br>PEDIDO</h2>
+      <p class="nl-popup-sub">Únete a la comunidad VOID y recibe acceso anticipado a drops limitados, descuentos y contenido exclusivo.</p>
+      <form class="nl-popup-form" (submit)="submitNewsletter($event)">
+        <input class="nl-popup-input" type="email" placeholder="tu@email.com" required>
+        <button class="nl-popup-btn" type="submit">QUIERO EL −15%</button>
+      </form>
+      <button class="nl-popup-skip" (click)="closeNewsletter()">No gracias, prefiero pagar precio completo →</button>
+      <div class="nl-popup-perk"><span>✓</span> Sin spam · Solo drops y ofertas reales</div>
+    </div>
+  </div>
+}
+
+<!-- ══ POPUP 2: EXIT INTENT ══ -->
+@if (showExit()) {
+  <div class="exit-overlay open" (click)="closeExit()"></div>
+  <div class="exit-popup open">
+    <button class="exit-close" (click)="closeExit()" aria-label="Cerrar popup de descuento">✕</button>
+    <span class="exit-emoji">👀</span>
+    <h2 class="exit-title">¿YA <span>TE VAS?</span></h2>
+    <p class="exit-sub">Espera. Antes de irte, toma este código exclusivo de descuento. Solo válido hoy.</p>
+    <div class="exit-code">VOID10</div>
+    <button class="exit-cta" (click)="applyDiscount()">USAR DESCUENTO AHORA →</button>
+    <button class="exit-skip" (click)="closeExit()">No, me voy sin el descuento</button>
+  </div>
+}

@@ -1,0 +1,29 @@
+<nav id="mainNav" [class.scrolled]="isScrolled">
+  <ul class="nav-left">
+    <li><a routerLink="/" fragment="products">Colección</a></li>
+    <li><a routerLink="/" fragment="cats">Categorías</a></li>
+    <li><a routerLink="/">Drops</a></li>
+    <li><a routerLink="/">Nosotros</a></li>
+  </ul>
+  
+  <a routerLink="/" class="nav-logo">VOID</a>
+  
+  <div class="nav-right">
+    @if (!authService.isLoggedIn()) {
+      <button class="nav-btn" (click)="openAuth()" aria-label="Mi cuenta">MI CUENTA</button>
+    } @else {
+      <button class="nav-user-btn" (click)="toggleUserPanel()" aria-label="Panel de usuario">
+        <span>{{ authService.currentUser()?.name || 'USER' }}</span>
+        <div class="nav-user-dot"></div>
+      </button>
+    }
+    <button class="nav-btn" (click)="openCart()" aria-label="Ver carrito">
+      CART <span class="cart-count">{{ cartService.count() }}</span>
+    </button>
+    <button class="menu-trigger" (click)="toggleMenu()" aria-label="Abrir menú móvil">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </button>
+  </div>
+</nav>

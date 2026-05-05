@@ -1,0 +1,16 @@
+<!-- ══ CHECKOUT MODAL ══ -->
+<div class="popup-overlay" [class.open]="isOpen()" (click)="close()"></div>
+<div id="chkModal" role="dialog" aria-modal="true" aria-label="Pasarela de pago" [class.open]="isOpen()">
+  <div class="chk-container">
+    <button class="chk-close" (click)="close()" aria-label="Cerrar">✕</button>
+    <div class="chk-header">
+      <div class="chk-title">CHECKOUT PRÓXIMAMENTE</div>
+    </div>
+    <div class="chk-body" style="padding:2rem;">
+      <p style="color:var(--muted); font-size:14px;">El proceso de pago completo se implementará en futuras versiones.</p>
+    </div>
+    <div class="chk-foot">
+      <button class="chk-btn" (click)="close()"><span>Volver</span></button>
+    </div>
+  </div>
+</div>

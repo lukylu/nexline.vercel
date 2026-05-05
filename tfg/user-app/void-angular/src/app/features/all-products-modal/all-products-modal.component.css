@@ -1,0 +1,10 @@
+/* CSS will be inherited from global styles, but adding specific transitions if needed */
+#allProductsBox {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+}

@@ -1,0 +1,7 @@
+/* Specific transitions if needed, mostly inherited from global styles */
+.nl-popup-overlay, .exit-overlay {
+  z-index: 100000;
+}
+.nl-popup, .exit-popup {
+  z-index: 100001;
+}
