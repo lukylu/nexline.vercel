@@ -12,13 +12,12 @@ export async function loadProducts() {
     const data = await res.json();
     const apiProducts = Array.isArray(data) ? data : (data.products || []);
     
-    // Merge API data with local data (enrichment)
-    cachedProducts = apiProducts.map((p: any) => {
+    // Normalize API products
+    const apiNormalized = apiProducts.map((p: any) => {
       const local = (products.find(lp => lp.name === p.name) || {}) as any;
       return {
         ...local,
         ...p,
-        // Map backend fields to frontend expectations
         sub: p.description || local.sub || '',
         cat: p.category || local.cat || 'all',
         sizes: Array.isArray(p.sizes) ? p.sizes : (p.sizes ? JSON.parse(p.sizes) : (local.sizes || [])),
@@ -26,91 +25,96 @@ export async function loadProducts() {
           const fullPath = img.startsWith('http') ? img : `http://localhost:3000${img}`;
           return encodeURI(fullPath);
         }),
-        // Use local img if backend has none
-        img: local.img || ''
+        img: p.image_url || local.img || ''
       };
     });
-    
-    console.log('✅ Catálogo dinámico cargado:', cachedProducts.length, 'productos');
+
+    // Find local products NOT in API (matching by name)
+    const apiNames = new Set(apiNormalized.map((p: any) => p.name));
+    const localOnly = products.filter(lp => !apiNames.has(lp.name));
+
+    cachedProducts = [...apiNormalized, ...localOnly];
+    console.log('✅ Catálogo combinado:', cachedProducts.length, 'productos');
     return cachedProducts;
   } catch (err) {
-    console.error('❌ Error cargando productos de la API:', err);
-    cachedProducts = products; // Fallback to local
+    console.error('❌ Error API, usando local:', err);
+    cachedProducts = products;
     return products;
   }
 }
 
+
+// Helper to generate HTML card
+function buildCardHtml(p: any, i: number, groups: Record<string, any[]>) {
+  const images = p.images || [];
+  const mainImg = images.length > 0 ? p.images[0] : ((productImgs[p.id] && productImgs[p.id][0]) || p.img);
+  const variants = groups[p.name] || [p];
+  
+  return `
+  <div class="pc" data-id="${p.id}" style="transition-delay:${i * 0.05}s">
+    <div class="pimg-wrap" onclick="openPd(${p.id})">
+      <img class="pimg ${p.category === 'sneakers' ? 'pimg-contain' : ''}" id="pimg-${p.id}" src="${mainImg}" alt="Fotografía de producto: ${p.name}" loading="lazy">
+      ${p.badge ? `<span class="pbadge b-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
+      ${p.stock <= 0 ? `<span class="pbadge b-sold">AGOTADO</span>` : ''}
+      <button class="pwish" onclick="toggleWish(event,${p.id})" id="wish-${p.id}" aria-label="Guardar ${p.name} en wishlist">♡</button>
+      ${p.stock > 0 ? `<button class="pqa" onclick="fastAdd(event,${p.id})" aria-label="Añadir ${p.name} al carrito rápidamente"><span>+</span> ${state.isLoggedIn() ? 'AÑADIR RÁPIDO' : 'INICIAR SESIÓN'}</button>` : ''}
+    </div>
+    <div class="pinfo">
+      <div class="pname" onclick="openPd(${p.id})">${p.name}</div>
+      <div class="psub">${p.sub.split('.')[0]}</div>
+      <div class="pfooter">
+        <div class="pprice">${p.old_price ? `<span class="old">${p.old_price}€</span><span class="sale">${p.price}€</span>` : `${p.price}€`}</div>
+        <div class="pswaches">
+          ${variants.map((v: any) => `
+            <div class="psw" 
+              style="background: ${colorMap[v.color.toUpperCase()] || '#ccc'}" 
+              title="${v.color}"
+              onclick="event.stopPropagation(); updateCardVariant(${p.id}, ${v.id})">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+`}
 
 export async function renderProducts(f = 'all') {
   if (cachedProducts.length === 0) {
     await loadProducts();
   }
   
-  // Group by name for the complete catalog
   const groups: Record<string, any[]> = {};
   cachedProducts.forEach(p => {
     if (!groups[p.name]) groups[p.name] = [];
     groups[p.name].push(p);
   });
-  const allUnique = Object.values(groups).map(group => group[0]); // Primary variants
+  const allUnique = Object.values(groups).map(group => group[0]);
 
-  // Split into collections
+  const catOrder: Record<string, number> = { 'hoodies': 1, 'tees': 2, 'jackets': 3, 'sneakers': 4 };
+  allUnique.sort((a, b) => {
+    const diff = (catOrder[a.cat] || 99) - (catOrder[b.cat] || 99);
+    return diff !== 0 ? diff : b.id - a.id;
+  });
+
   const bestSellers = allUnique.filter(p => p.is_featured === 1);
   const newArrivals = allUnique.filter(p => p.is_new === 1);
   const filteredCatalog = f === 'all' ? allUnique : allUnique.filter(p => p.cat === f);
 
-  // Helper to generate HTML card
-  const buildCardHtml = (p: any, i: number) => {
-    const variants = groups[p.name];
-    const images = p.images || [];
-    const mainImg = images.length > 0 ? p.images[0] : ((productImgs[p.id] && productImgs[p.id][0]) || p.img);
-    
-    return `
-    <div class="pc" data-id="${p.id}" style="transition-delay:${i * 0.05}s">
-      <div class="pimg-wrap" onclick="openPd(${p.id})">
-        <img class="pimg ${p.category === 'sneakers' ? 'pimg-contain' : ''}" id="pimg-${p.id}" src="${mainImg}" alt="Fotografía de producto: ${p.name}" loading="lazy">
-        ${p.badge ? `<span class="pbadge b-${p.badge.toLowerCase()}">${p.badge}</span>` : ''}
-        ${p.stock <= 0 ? `<span class="pbadge b-sold">AGOTADO</span>` : ''}
-        <button class="pwish" onclick="toggleWish(event,${p.id})" id="wish-${p.id}" aria-label="Guardar ${p.name} en wishlist">♡</button>
-        ${p.stock > 0 ? `<button class="pqa" onclick="fastAdd(event,${p.id})" aria-label="Añadir ${p.name} al carrito rápidamente"><span>+</span> ${state.isLoggedIn() ? 'AÑADIR RÁPIDO' : 'INICIAR SESIÓN'}</button>` : ''}
-      </div>
-      <div class="pinfo">
-        <div class="pname" onclick="openPd(${p.id})">${p.name}</div>
-        <div class="psub">${p.sub.split('.')[0]}</div>
-        <div class="pfooter">
-          <div class="pprice">${p.old_price ? `<span class="old">${p.old_price}€</span><span class="sale">${p.price}€</span>` : `${p.price}€`}</div>
-          <div class="pswaches">
-            ${variants.map((v: any) => `
-              <div class="psw" 
-                style="background: ${colorMap[v.color.toUpperCase()] || '#ccc'}" 
-                title="${v.color}"
-                onclick="event.stopPropagation(); updateCardVariant(${p.id}, ${v.id})">
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </div>
-    </div>
-  `};
-
-  // Render Grids
   const bsGrid = document.getElementById('bsGrid');
-  if (bsGrid) bsGrid.innerHTML = bestSellers.map(buildCardHtml).join('');
+  if (bsGrid) bsGrid.innerHTML = bestSellers.map((p, i) => buildCardHtml(p, i, groups)).join('');
 
   const naGrid = document.getElementById('naGrid');
-  if (naGrid) naGrid.innerHTML = newArrivals.map(buildCardHtml).join('');
+  if (naGrid) naGrid.innerHTML = newArrivals.map((p, i) => buildCardHtml(p, i, groups)).join('');
 
   const carGrid = document.getElementById('pgrid-carousel');
-  if (carGrid) carGrid.innerHTML = filteredCatalog.map(buildCardHtml).join('');
+  if (carGrid) carGrid.innerHTML = filteredCatalog.map((p, i) => buildCardHtml(p, i, groups)).join('');
 
   const modalGrid = document.getElementById('modalGrid');
-  if (modalGrid) modalGrid.innerHTML = filteredCatalog.map(buildCardHtml).join('');
+  if (modalGrid) modalGrid.innerHTML = filteredCatalog.map((p, i) => buildCardHtml(p, i, groups)).join('');
 
-  // Update counter
   const prodCount = document.getElementById('prodCount');
   if (prodCount) prodCount.textContent = filteredCatalog.length + ' productos';
 
-  // Add global helper for variant switching in grid
   (window as any).updateCardVariant = (baseId: number, variantId: number) => {
     const v = cachedProducts.find(x => x.id === variantId);
     if (!v) return;
@@ -130,7 +134,6 @@ export async function renderProducts(f = 'all') {
     });
   };
   
-  // Carousel Scroll Helper
   (window as any).scrollCar = (dir: number) => {
     const car = document.getElementById('pgrid-carousel');
     if (car) {
@@ -141,7 +144,6 @@ export async function renderProducts(f = 'all') {
 
   requestAnimationFrame(() => {
     document.querySelectorAll('.pc').forEach((el, i) => setTimeout(() => el.classList.add('visible'), i * 50));
-    // Sync wish hearts after cards are in DOM
     setTimeout(() => {
       syncAllWishUI();
       renderWishlistModal();
@@ -155,11 +157,64 @@ export async function filterP(btn: HTMLElement, cat: string) {
   await renderProducts(cat);
 }
 
+let currentModalCat = 'all';
+
 export async function filterModal(btn: HTMLElement, cat: string) {
-  document.querySelectorAll('#allProductsBox .fb').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#allProductsBox .mf-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  await renderProducts(cat);
+  currentModalCat = cat;
+  await (window as any).applyModalFilters();
 }
+
+(window as any).applyModalFilters = async () => {
+  const searchInput = document.getElementById('modalSearch') as HTMLInputElement;
+  const sortSelect = document.getElementById('modalSort') as HTMLSelectElement;
+  const searchTerm = searchInput?.value.toLowerCase() || '';
+  const sortBy = sortSelect?.value || 'newest';
+  
+  if (cachedProducts.length === 0) await loadProducts();
+  
+  const groups: Record<string, any[]> = {};
+  cachedProducts.forEach(p => {
+    if (!groups[p.name]) groups[p.name] = [];
+    groups[p.name].push(p);
+  });
+  const allUnique = Object.values(groups).map(group => group[0]);
+
+  const catOrder: Record<string, number> = { 'hoodies': 1, 'tees': 2, 'jackets': 3, 'sneakers': 4 };
+  allUnique.sort((a, b) => {
+    const diff = (catOrder[a.cat] || 99) - (catOrder[b.cat] || 99);
+    return diff !== 0 ? diff : b.id - a.id;
+  });
+
+  let filtered = allUnique;
+  if (currentModalCat !== 'all') {
+    filtered = filtered.filter(p => p.cat === currentModalCat);
+  }
+  if (searchTerm) {
+    filtered = filtered.filter(p => 
+      p.name.toLowerCase().includes(searchTerm) || 
+      p.sub.toLowerCase().includes(searchTerm) ||
+      p.cat.toLowerCase().includes(searchTerm)
+    );
+  }
+  
+  if (sortBy === 'price-low') filtered.sort((a, b) => a.price - b.price);
+  else if (sortBy === 'price-high') filtered.sort((a, b) => b.price - a.price);
+
+  const modalGrid = document.getElementById('modalGrid');
+  if (modalGrid) {
+    modalGrid.innerHTML = filtered.map((p, i) => buildCardHtml(p, i, groups)).join('');
+    requestAnimationFrame(() => {
+      modalGrid.querySelectorAll('.pc').forEach((el, i) => {
+        setTimeout(() => el.classList.add('visible'), i * 20);
+      });
+    });
+  }
+  
+  const modalCount = document.getElementById('modalCount');
+  if (modalCount) modalCount.textContent = `${filtered.length} PRODUCTOS ENCONTRADOS`;
+};
 
 export function toggleWish(e: Event, id: number) {
   e.stopPropagation();
@@ -174,6 +229,7 @@ export function toggleWish(e: Event, id: number) {
     overlay.classList.add('open');
     box.classList.add('open');
     document.body.style.overflow = 'hidden';
+    (window as any).applyModalFilters();
   }
 };
 

@@ -376,18 +376,48 @@
 
 <!-- ALL PRODUCTS MODAL -->
 <div class="popup-overlay" id="allProductsOverlay" onclick="closeAllProductsModal()"></div>
-<div class="popup-box" id="allProductsBox" style="width:100%; max-width:100%; height:100vh; max-height:100vh; top:0; left:0; transform:none; border-radius:0; border:none; background:var(--black); overflow-y:auto; padding-top:4rem;">
-  <button class="popup-close" style="position:fixed; top:2rem; right:2rem; z-index:9999; background:rgba(0,0,0,0.8);" onclick="closeAllProductsModal()">✕</button>
-  <div style="padding:3rem 5vw;">
-    <div class="sec-head">
+<div class="popup-box-full" id="allProductsBox">
+  <button class="modal-close-btn" onclick="closeAllProductsModal()" aria-label="Cerrar catálogo">✕</button>
+  
+  <header class="modal-header">
+    <div class="modal-header-top">
       <div class="sec-title-wrap">
         <span class="sec-meta">// CATÁLOGO COMPLETO</span>
         <h2 class="sec-title">TODOS LOS <em>PRODUCTOS</em></h2>
       </div>
     </div>
-    <div class="pgrid expanded" id="modalGrid" style="margin-top:3rem;"></div>
+    
+    <div class="modal-tools">
+      <div class="modal-search-wrap">
+        <span class="modal-search-icon">🔍</span>
+        <input type="text" class="modal-search" id="modalSearch" placeholder="Buscar productos..." oninput="applyModalFilters()">
+      </div>
+      
+      <div class="modal-filters">
+        <button class="mf-btn active" onclick="filterModal(this, 'all')">Todo</button>
+        <button class="mf-btn" onclick="filterModal(this, 'hoodies')">Hoodies</button>
+        <button class="mf-btn" onclick="filterModal(this, 'tees')">Tees</button>
+        <button class="mf-btn" onclick="filterModal(this, 'jackets')">Cazadoras</button>
+        <button class="mf-btn" onclick="filterModal(this, 'sneakers')">Zapatillas</button>
+      </div>
+      
+      <div class="modal-sort-wrap">
+        <select class="modal-sort" id="modalSort" onchange="applyModalFilters()">
+          <option value="newest">Más recientes</option>
+          <option value="price-low">Precio: Menor a mayor</option>
+          <option value="price-high">Precio: Mayor a menor</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="modal-count" id="modalCount">0 PRODUCTOS ENCONTRADOS</div>
+  </header>
+
+  <div class="modal-body">
+    <div class="pgrid expanded" id="modalGrid"></div>
   </div>
 </div>
+
 
 <div class="mob-menu" id="mobMenu">
   <a href="#products" onclick="toggleMenu()">Colección</a>
@@ -496,23 +526,24 @@
 <div id="cats">
   <div class="sec-head reveal"><h2 class="sec-title">CATEGORÍAS</h2><span class="sec-meta">Explorar todo</span></div>
   <div class="cats">
-    <a href="#" class="cat reveal" onclick="openAllProductsModal(); filterModal(document.querySelector('#allProductsBox .fb:nth-child(2)'),'hoodies'); return false;">
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(2)'),'hoodies'), 50); return false;">
       <div class="cat-bg" style="background-image:url('http://localhost:3000/nexline_datos/images/categorias/hoodies.jpg')"></div>
       <span class="cat-num">01</span><span class="cat-name">HOODIES</span><span class="cat-count">5 piezas</span><span class="cat-arrow">→</span>
     </a>
-    <a href="#" class="cat reveal" onclick="openAllProductsModal(); filterModal(document.querySelector('#allProductsBox .fb:nth-child(3)'),'tees'); return false;">
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(3)'),'tees'), 50); return false;">
       <div class="cat-bg" style="background-image:url('http://localhost:3000/nexline_datos/images/categorias/tees.jpg')"></div>
       <span class="cat-num">02</span><span class="cat-name">TEES</span><span class="cat-count">5 piezas</span><span class="cat-arrow">→</span>
     </a>
-    <a href="#" class="cat reveal" onclick="openAllProductsModal(); filterModal(document.querySelector('#allProductsBox .fb:nth-child(4)'),'jackets'); return false;">
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(4)'),'jackets'), 50); return false;">
       <div class="cat-bg" style="background-image:url('http://localhost:3000/nexline_datos/images/categorias/cazadoras.jpg')"></div>
       <span class="cat-num">03</span><span class="cat-name">CAZADORAS</span><span class="cat-count">2 piezas</span><span class="cat-arrow">→</span>
     </a>
-    <a href="#" class="cat reveal" onclick="openAllProductsModal(); filterModal(document.querySelector('#allProductsBox .fb:nth-child(5)'),'sneakers'); return false;">
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(5)'),'sneakers'), 50); return false;">
       <div class="cat-bg" style="background-image:url('http://localhost:3000/nexline_datos/images/categorias/zapatillas.jpg')"></div>
       <span class="cat-num">04</span><span class="cat-name">ZAPATILLAS</span><span class="cat-count">5 piezas</span><span class="cat-arrow">→</span>
     </a>
   </div>
+
 </div>
 
 <!-- NL -->

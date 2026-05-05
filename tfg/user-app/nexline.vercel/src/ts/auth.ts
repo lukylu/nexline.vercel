@@ -187,6 +187,7 @@ export function logoutUser() {
   fetch('http://localhost:3000/api/auth/logout', { method: 'POST' })
     .finally(() => {
       state.setCurrentUser(null);
+      localStorage.removeItem('voidUser');
       updateAuthUI();
       state.setCart([]);
       cart.updateCart();
@@ -211,13 +212,20 @@ export function checkAuth() {
     .then(data => {
       if (data.user) {
         state.setCurrentUser(data.user);
-        updateAuthUI();
+      } else {
+        // Server says not authenticated — clear stale localStorage session
+        state.setCurrentUser(null);
+        localStorage.removeItem('voidUser');
       }
+      updateAuthUI();
+      renderProducts();
     })
     .catch(() => {
-      // Not logged in or error
+      // Network error or server down — clear session to be safe
       state.setCurrentUser(null);
+      localStorage.removeItem('voidUser');
       updateAuthUI();
+      renderProducts();
     });
 }
 

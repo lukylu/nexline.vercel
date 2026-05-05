@@ -233,6 +233,11 @@ export function closeSg() {
 }
 
 export function openCart() {
+  if (!state.isLoggedIn()) {
+    openAuth('login', { type: 'cart-open' });
+    showToast('⚠ INICIA SESIÓN PARA VER TU CARRITO');
+    return;
+  }
   const cart = document.getElementById('cd');
   if (cart) cart.classList.add('open');
 }
@@ -298,6 +303,11 @@ export function closeOrders() {
 }
 
 export function openWishlist() {
+  if (!state.isLoggedIn()) {
+    openAuth('login', { type: 'wish-open' });
+    showToast('⚠ INICIA SESIÓN PARA VER TU WISHLIST');
+    return;
+  }
   renderWishlistModal();
   const overlay = document.getElementById('wishlistOverlay');
   const box = document.getElementById('wishlistBox');
