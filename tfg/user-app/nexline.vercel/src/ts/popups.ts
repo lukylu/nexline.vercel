@@ -72,16 +72,24 @@ export function openPd(id: number) {
   // Color variants in popup
   const baseName = p.name.trim();
   const variants = cachedProducts.filter(x => x.name.trim() === baseName);
+  // Deduplicate variants by color
+  const seenColors = new Set();
+  const uniqueVariants = variants.filter((v: any) => {
+    const c = (v.color || '').toUpperCase();
+    if (seenColors.has(c)) return false;
+    seenColors.add(c);
+    return true;
+  });
   const colorSection = document.getElementById('pdColors');
   
   if (colorSection) {
-    if (variants.length > 1) {
+    if (uniqueVariants.length > 1) {
       colorSection.style.display = 'block';
       colorSection.style.minHeight = '30px'; // Ensure visibility
       colorSection.innerHTML = `
         <div class="pd-colors-label">Colores disponibles</div>
         <div class="pd-colors-list">
-          ${variants.map(v => {
+          ${uniqueVariants.map(v => {
             const colorKey = (v.color || '').toUpperCase().trim();
             const colorStyle = colorMap[colorKey] || '#888';
             return `

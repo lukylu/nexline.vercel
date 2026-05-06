@@ -9,6 +9,8 @@ export interface Product {
   color: string;
   img: string;
   sizes: string[];
+  is_featured?: number;
+  is_new?: number;
 }
 
 export interface CartItem {

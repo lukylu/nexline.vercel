@@ -18,6 +18,7 @@ export async function loadProducts() {
       return {
         ...local,
         ...p,
+        id: p.id || p._id || local.id || Math.floor(Math.random() * 1000000),
         sub: p.description || local.sub || '',
         cat: p.category || local.cat || 'all',
         sizes: Array.isArray(p.sizes) ? p.sizes : (p.sizes ? JSON.parse(p.sizes) : (local.sizes || [])),
@@ -33,13 +34,21 @@ export async function loadProducts() {
     const apiNames = new Set(apiNormalized.map((p: any) => p.name));
     const localOnly = products.filter(lp => !apiNames.has(lp.name));
 
-    cachedProducts = [...apiNormalized, ...localOnly];
+    cachedProducts = [...apiNormalized, ...localOnly].map(p => ({
+      ...p,
+      is_featured: p.is_featured ?? (p.badge?.toLowerCase().includes('hot') ? 1 : 0),
+      is_new: p.is_new ?? (p.badge?.toLowerCase().includes('new') ? 1 : 0),
+    }));
     console.log('✅ Catálogo combinado:', cachedProducts.length, 'productos');
     return cachedProducts;
   } catch (err) {
     console.error('❌ Error API, usando local:', err);
-    cachedProducts = products;
-    return products;
+    cachedProducts = products.map(p => ({
+      ...p,
+      is_featured: p.is_featured ?? (p.badge?.toLowerCase().includes('hot') ? 1 : 0),
+      is_new: p.is_new ?? (p.badge?.toLowerCase().includes('new') ? 1 : 0),
+    }));
+    return cachedProducts;
   }
 }
 
@@ -49,6 +58,14 @@ function buildCardHtml(p: any, i: number, groups: Record<string, any[]>) {
   const images = p.images || [];
   const mainImg = images.length > 0 ? p.images[0] : ((productImgs[p.id] && productImgs[p.id][0]) || p.img);
   const variants = groups[p.name] || [p];
+  // Deduplicate variants by color to avoid repeated swatches
+  const seenColors = new Set();
+  const uniqueVariants = variants.filter((v: any) => {
+    const c = (v.color || '').toUpperCase();
+    if (seenColors.has(c)) return false;
+    seenColors.add(c);
+    return true;
+  });
   
   return `
   <div class="pc" data-id="${p.id}" style="transition-delay:${i * 0.05}s">
@@ -65,7 +82,7 @@ function buildCardHtml(p: any, i: number, groups: Record<string, any[]>) {
       <div class="pfooter">
         <div class="pprice">${p.old_price ? `<span class="old">${p.old_price}€</span><span class="sale">${p.price}€</span>` : `${p.price}€`}</div>
         <div class="pswaches">
-          ${variants.map((v: any) => `
+          ${uniqueVariants.map((v: any) => `
             <div class="psw" 
               style="background: ${colorMap[v.color.toUpperCase()] || '#ccc'}" 
               title="${v.color}"
@@ -88,7 +105,12 @@ export async function renderProducts(f = 'all') {
     if (!groups[p.name]) groups[p.name] = [];
     groups[p.name].push(p);
   });
-  const allUnique = Object.values(groups).map(group => group[0]);
+  const allUnique = Object.values(groups).map(group => {
+    const main = { ...group[0] };
+    main.is_new = group.some(p => p.is_new === 1) ? 1 : 0;
+    main.is_featured = group.some(p => p.is_featured === 1) ? 1 : 0;
+    return main;
+  });
 
   const catOrder: Record<string, number> = { 'hoodies': 1, 'tees': 2, 'jackets': 3, 'sneakers': 4 };
   allUnique.sort((a, b) => {

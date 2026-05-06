@@ -197,10 +197,10 @@ function chkShake() {
 
 function initCardPreview() {
   const numEl = document.getElementById('f-cardnum') as HTMLInputElement;
-  // const holderEl = document.getElementById('f-holder') as HTMLInputElement;
-  // const expEl = document.getElementById('f-expiry') as HTMLInputElement;
-  // const cvvEl = document.getElementById('f-cvv') as HTMLInputElement;
-  // const card = document.getElementById('cardPreview');
+  const holderEl = document.getElementById('f-holder') as HTMLInputElement;
+  const expEl = document.getElementById('f-expiry') as HTMLInputElement;
+  const cvvEl = document.getElementById('f-cvv') as HTMLInputElement;
+  const card = document.getElementById('cardPreview');
 
   if (numEl) {
     numEl.addEventListener('input', e => {
@@ -210,7 +210,34 @@ function initCardPreview() {
       if (preview) preview.textContent = (e.target as HTMLInputElement).value.padEnd(19, '•').replace(/ /g, ' ') || '•••• •••• •••• ••••';
     });
   }
-  // ... rest of preview logic
+
+  if (holderEl) {
+    holderEl.addEventListener('input', e => {
+      const preview = document.getElementById('previewHolder');
+      if (preview) preview.textContent = (e.target as HTMLInputElement).value.toUpperCase() || 'NOMBRE APELLIDO';
+    });
+  }
+
+  if (expEl) {
+    expEl.addEventListener('input', e => {
+      let v = (e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 4);
+      if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
+      (e.target as HTMLInputElement).value = v;
+      const preview = document.getElementById('previewExp');
+      if (preview) preview.textContent = v || 'MM/AA';
+    });
+  }
+
+  if (cvvEl) {
+    cvvEl.addEventListener('input', e => {
+      let v = (e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 4);
+      (e.target as HTMLInputElement).value = v;
+      const preview = document.getElementById('previewCvv');
+      if (preview) preview.textContent = v.padEnd(3, '•');
+    });
+    cvvEl.addEventListener('focus', () => card?.classList.add('flipped'));
+    cvvEl.addEventListener('blur', () => card?.classList.remove('flipped'));
+  }
 }
 
 function processPayment() {

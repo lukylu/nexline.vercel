@@ -242,10 +242,10 @@
 
 <nav id="mainNav">
   <ul class="nav-left">
+    <li><a href="#newArrivals">Drops</a></li>
     <li><a href="#products">Colección</a></li>
     <li><a href="#cats">Categorías</a></li>
-    <li><a href="#">Drops</a></li>
-    <li><a href="#">Nosotros</a></li>
+    <li><a href="#about">Nosotros</a></li>
   </ul>
   
   <a href="#" class="nav-logo">VOID</a>
@@ -420,10 +420,10 @@
 
 
 <div class="mob-menu" id="mobMenu">
+  <a href="#newArrivals" onclick="toggleMenu()">Drops</a>
   <a href="#products" onclick="toggleMenu()">Colección</a>
   <a href="#cats" onclick="toggleMenu()">Categorías</a>
-  <a href="#" onclick="toggleMenu()">Drops</a>
-  <a href="#" onclick="toggleMenu()">Nosotros</a>
+  <a href="#about" onclick="toggleMenu()">Nosotros</a>
   <button class="mob-cart-btn" onclick="toggleMenu();openCart()">Carrito (<span id="ccM">0</span>)</button>
   <button class="mob-cart-btn" id="mobAuthBtn" onclick="toggleMenu();openAuth('login')" style="background:none;border:1px solid rgba(255,255,255,.15);color:var(--muted);margin-top:-.5rem;">Iniciar sesión</button>
 </div>
@@ -560,7 +560,7 @@
 </div>
 
 <!-- FOOTER -->
-<footer>
+<footer id="about">
   <div class="footer-brand">
     <a href="#" class="nav-logo">VOID</a>
     <p class="footer-tagline">Streetwear sin concesiones para los que no siguen el juego. Desde 2024.</p>
