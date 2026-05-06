@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { RevealDirective } from '../../shared/directives/reveal.directive';
 import { HeroComponent } from '../hero/hero.component';
 import { MarqueeComponent } from '../marquee/marquee.component';
 import { BestSellersComponent } from '../best-sellers/best-sellers.component';
@@ -16,7 +17,8 @@ import { CategoriesComponent } from '../categories/categories.component';
     NewArrivalsComponent,
     CollectionComponent,
     StatsComponent,
-    CategoriesComponent
+    CategoriesComponent,
+    RevealDirective
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',

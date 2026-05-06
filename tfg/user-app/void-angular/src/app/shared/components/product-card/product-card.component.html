@@ -1,31 +1,41 @@
-<div class="pcard reveal" [class.sold-out]="product.stock === 0" (click)="openDetail(product)">
-  <div class="pimg-wrap">
-    @if (product.badge) {
-      <span class="pbadge" [class.hot]="product.badge === 'HOT'" [class.new]="product.badge === 'NEW'">{{product.badge}}</span>
-    }
-    <img [src]="getMainImage()" [alt]="product.name" class="pimg">
-    <div class="pimg-hover" [style.background-image]="'url(' + getHoverImage() + ')'"></div>
-    <div class="pcard-actions">
-      <button class="paction-btn" aria-label="Añadir a wishlist" (click)="toggleWishlist($event, product)">
-        <svg viewBox="0 0 24 24" fill="none" [attr.stroke]="isInWishlist() ? 'var(--vivid-pink)' : 'currentColor'" stroke-width="2">
-          <path [attr.fill]="isInWishlist() ? 'var(--vivid-pink)' : 'none'" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-        </svg>
+@if (product) {
+  <div class="pc reveal" [class.sold-out]="product.stock === 0" (click)="openDetail(product)" voidReveal>
+    <div class="pimg-wrap">
+      @if (product.badge) {
+        <span class="pbadge" [class]="'b-' + product.badge.toLowerCase()">{{product.badge}}</span>
+      }
+      @if (product.stock === 0) {
+        <span class="pbadge b-sold">AGOTADO</span>
+      }
+      <img [src]="getMainImage()" [alt]="product.name" class="pimg" [class.pimg-contain]="product.cat === 'sneakers'">
+      
+      <button class="pwish" [class.liked]="isInWishlist()" (click)="toggleWishlist($event, product)" aria-label="Guardar en wishlist">
+        {{ isInWishlist() ? '♥' : '♡' }}
       </button>
+      
+      @if (product.stock !== undefined && product.stock > 0) {
+        <button class="pqa" (click)="quickAdd($event, product)">
+          <span>+</span> AÑADIR RÁPIDO
+        </button>
+      }
     </div>
-  </div>
-  <div class="pinfo">
-    <div class="pinfo-top">
-      <h3 class="pname">{{product.name}}</h3>
-      <div class="pprice">
-        @if (product.old_price) {
-          <span class="pold">€{{product.old_price}}</span>
-        }
-        <span class="pcurrent">€{{product.price}}</span>
+    
+    <div class="pinfo">
+      <div class="pname">{{product.name}}</div>
+      <div class="psub">{{product.sub}}</div>
+      <div class="pfooter">
+        <div class="pprice">
+          @if (product.old_price) {
+            <span class="old">{{product.old_price}}€</span>
+            <span class="sale">{{product.price}}€</span>
+          } @else {
+            {{product.price}}€
+          }
+        </div>
+        <div class="pswaches">
+          <div class="psw active" [style.background]="product.color"></div>
+        </div>
       </div>
     </div>
-    <p class="psub">{{product.sub}}</p>
-    <div class="pcolors">
-      <div class="pcolor active" [style.background]="product.color"></div>
-    </div>
   </div>
-</div>
+}

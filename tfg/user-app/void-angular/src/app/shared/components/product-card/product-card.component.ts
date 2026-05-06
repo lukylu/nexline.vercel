@@ -2,10 +2,12 @@ import { Component, Input, inject } from '@angular/core';
 import { Product } from '../../../core/models/product.model';
 import { ModalService } from '../../../core/services/modal.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
+import { CartService } from '../../../core/services/cart.service';
+import { RevealDirective } from '../../directives/reveal.directive';
 
 @Component({
   selector: 'void-product-card',
-  imports: [],
+  imports: [RevealDirective],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.css'
 })
@@ -14,9 +16,15 @@ export class ProductCardComponent {
   
   private modalService = inject(ModalService);
   private wishlistService = inject(WishlistService);
+  private cartService = inject(CartService);
 
   openDetail(product: Product) {
     this.modalService.open('product', product);
+  }
+
+  quickAdd(event: Event, product: Product) {
+    event.stopPropagation();
+    this.cartService.fastAdd(product.id);
   }
 
   isInWishlist() {

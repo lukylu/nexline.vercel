@@ -8,6 +8,7 @@ export class RevealDirective implements OnInit {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
+          console.log('👁️ Reveal triggered for:', entry.target);
           entry.target.classList.add('vis');
           observer.unobserve(entry.target);
         }

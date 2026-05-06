@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './layout/navbar/navbar.component';
 import { FooterComponent } from './layout/footer/footer.component';
@@ -15,6 +15,8 @@ import { OrdersModalComponent } from './shared/components/orders-modal/orders-mo
 import { CheckoutComponent } from './shared/components/checkout/checkout.component';
 import { AllProductsModalComponent } from './features/all-products-modal/all-products-modal.component';
 import { PromotionPopupsComponent } from './features/popups/promotion-popups.component';
+import { ProductService } from './core/services/product.service';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'void-root',
@@ -39,6 +41,13 @@ import { PromotionPopupsComponent } from './features/popups/promotion-popups.com
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class App {
+export class App implements OnInit {
+  private productService = inject(ProductService);
+  private authService = inject(AuthService);
   protected readonly title = signal('void-angular');
+
+  ngOnInit() {
+    this.authService.checkAuth();
+    this.productService.loadProducts();
+  }
 }

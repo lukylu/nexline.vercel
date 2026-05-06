@@ -311,7 +311,7 @@ nav.scrolled {
 .carousel-view.expanded ~ .car-arrow { display: none; }
 
 .pc{border-right:1px solid var(--gray2);border-bottom:1px solid var(--gray2);position:relative;overflow:hidden;cursor:none;background:var(--black);opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s,background .35s;}
-.pc.visible{opacity:1;transform:translateY(0);}
+.pc.visible, .pc.vis{opacity:1;transform:translateY(0);}
 .pc:hover{background:var(--gray);}
 .pc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,61,0,.05),rgba(200,255,0,.03));opacity:0;transition:opacity .4s;pointer-events:none;z-index:1;}
 .pc:hover::after{opacity:1;}
@@ -730,7 +730,7 @@ footer{border-top:1px solid var(--gray2);padding:3rem 2.5rem;display:grid;grid-t
 .sg-note{font-size:10px;color:var(--muted);font-weight:300;line-height:1.7;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--gray2);}
 
 /* ── REVEAL ── */
-.reveal{opacity:0;transform:translateY(20px);transition:opacity .65s,transform .65s;}
+.reveal{opacity:1 !important;transform:translateY(0) !important;transition:none !important;}
 .reveal.vis{opacity:1;transform:translateY(0);}
 
 /* ── TOUCH / TAP ── */

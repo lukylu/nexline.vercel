@@ -8,7 +8,7 @@ export let cachedProducts: any[] = [];
 
 export async function loadProducts() {
   try {
-    const res = await fetch('http://localhost:3000/api/products');
+    const res = await fetch('/api/products');
     const data = await res.json();
     const apiProducts = Array.isArray(data) ? data : (data.products || []);
     
@@ -22,7 +22,7 @@ export async function loadProducts() {
         cat: p.category || local.cat || 'all',
         sizes: Array.isArray(p.sizes) ? p.sizes : (p.sizes ? JSON.parse(p.sizes) : (local.sizes || [])),
         images: (Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : [])).map((img: string) => {
-          const fullPath = img.startsWith('http') ? img : `http://localhost:3000${img}`;
+          const fullPath = img.startsWith('http') ? img : `${img}`;
           return encodeURI(fullPath);
         }),
         img: p.image_url || local.img || ''

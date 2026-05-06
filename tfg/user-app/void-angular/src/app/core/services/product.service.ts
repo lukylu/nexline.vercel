@@ -55,7 +55,9 @@ export class ProductService {
     if (this.products().length > 0) return;
     this.loading.set(true);
     try {
+      console.log('📡 Fetching products from:', `${environment.apiUrl}/api/products`);
       const data = await this.http.get<any>(`${environment.apiUrl}/api/products`).toPromise();
+      console.log('📦 Raw Data received:', data);
       const apiProducts = Array.isArray(data) ? data : (data?.products || []);
       const normalized: Product[] = apiProducts.map((p: any) => ({
         id: p.id,
@@ -69,7 +71,7 @@ export class ProductService {
         img: p.image_url || '',
         images: (Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : [])).map((img: string) => {
           const fullPath = img.startsWith('http') ? img : `${environment.apiUrl}${img}`;
-          return encodeURI(fullPath);
+          return encodeURI(fullPath).replace(/\+/g, '%2B');
         }),
         sizes: Array.isArray(p.sizes) ? p.sizes : (p.sizes ? JSON.parse(p.sizes) : []),
         stock: p.stock ?? 100,

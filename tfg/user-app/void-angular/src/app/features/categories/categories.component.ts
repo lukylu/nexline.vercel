@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { RevealDirective } from '../../shared/directives/reveal.directive';
 
 @Component({
   selector: 'void-categories',
-  imports: [],
+  imports: [RevealDirective],
   templateUrl: './categories.component.html',
   styleUrl: './categories.component.css',
 })
