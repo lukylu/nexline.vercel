@@ -2,13 +2,13 @@ import { products, productImgs } from './data';
 import { doWish, syncAllWishUI, renderWishlistModal } from './wishes';
 import { colorMap } from './utils';
 import * as state from './state';
-
+import { API_URL, BASE_URL } from './config';
 
 export let cachedProducts: any[] = [];
 
 export async function loadProducts() {
   try {
-    const res = await fetch('http://localhost:3000/api/products');
+    const res = await fetch(`${API_URL}/products`);
     const data = await res.json();
     const apiProducts = Array.isArray(data) ? data : (data.products || []);
     
@@ -23,7 +23,7 @@ export async function loadProducts() {
         cat: (p.category || p.cat || local.cat || 'all').toLowerCase(),
         sizes: Array.isArray(p.sizes) ? p.sizes : (p.sizes ? JSON.parse(p.sizes) : (local.sizes || [])),
         images: (Array.isArray(p.images) ? p.images : (p.images ? JSON.parse(p.images) : [])).map((img: string) => {
-          const fullPath = img.startsWith('http') ? img : `http://localhost:3000${img}`;
+          const fullPath = img.startsWith('http') ? img : `${BASE_URL}${img}`;
           return encodeURI(fullPath);
         }),
         img: p.image_url || local.img || ''

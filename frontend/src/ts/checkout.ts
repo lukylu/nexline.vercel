@@ -1,6 +1,7 @@
 import * as state from './state';
 import { showToast } from './utils';
 import { updateCart } from './cart';
+import { API_URL } from './config';
 
 // Stripe initialization
 declare var Stripe: any;
@@ -201,7 +202,7 @@ async function preparePayment() {
   if (btn) { btn.disabled = true; btn.textContent = 'PREPARANDO PAGO...'; }
 
   try {
-    const response = await fetch('http://localhost:3000/api/payment/create-payment-intent', {
+    const response = await fetch(`${API_URL}/payment/create-payment-intent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -341,7 +342,7 @@ async function createOrder() {
   };
 
   try {
-    const response = await fetch('http://localhost:3000/api/orders', {
+    const response = await fetch(`${API_URL}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)

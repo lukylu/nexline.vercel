@@ -4,6 +4,7 @@ import { closeAuth, openCart } from './popups';
 import * as cart from './cart';
 import * as wishes from './wishes';
 import { renderProducts } from './products';
+import { API_URL } from './config';
 
 
 
@@ -100,7 +101,7 @@ export function submitLogin() {
   
   if (!ok) return;
   
-  fetch('http://localhost:3000/api/auth/login', {
+  fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password: pass })
@@ -143,7 +144,7 @@ export function submitRegister() {
   
   if (!ok) return;
 
-  fetch('http://localhost:3000/api/auth/register', {
+  fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, password: pass })
@@ -184,7 +185,7 @@ export function loginSuccess(user: any) {
 }
 
 export function logoutUser() {
-  fetch('http://localhost:3000/api/auth/logout', { method: 'POST' })
+  fetch(`${API_URL}/auth/logout`, { method: 'POST' })
     .finally(() => {
       state.setCurrentUser(null);
       localStorage.removeItem('voidUser');
@@ -207,7 +208,7 @@ export function logoutUser() {
 }
 
 export function checkAuth() {
-  fetch('http://localhost:3000/api/auth/me')
+  fetch(`${API_URL}/auth/me`)
     .then(res => res.json())
     .then(data => {
       if (data.user) {
