@@ -16,7 +16,7 @@ export function openPd(id: string | number) {
   const sizeGuide = document.getElementById('pdSizeGuide');
   if (sizeGuide) sizeGuide.classList.remove('open');
 
-  const imgs = (p.images && p.images.length > 0) ? p.images : ((productImgs[id] && productImgs[id].length > 0) ? productImgs[id] : [p.img]);
+  const imgs = (p.images && p.images.length > 0) ? p.images : (((productImgs as any)[id] && (productImgs as any)[id].length > 0) ? (productImgs as any)[id] : [p.img]);
 
   const mainImg = document.getElementById('pdImg') as HTMLImageElement;
   if (mainImg) {

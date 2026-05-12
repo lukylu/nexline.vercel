@@ -268,7 +268,7 @@ async function initStripeElements() {
     }
   });
 
-  cardExpiryElement.on('change', (e: any) => {
+  cardExpiryElement.on('change', () => {
     const preview = document.getElementById('previewExp');
     if (preview) {
       // If we don't have the value, we can't show it exactly, but we can simulate
