@@ -39,4 +39,11 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { loginAdmin, register, login };
+const me = async (req, res) => {
+  // En un entorno real se extraería el JWT del header Authorization
+  // y se devolverían los datos del usuario. 
+  // Por ahora devolvemos 401 para limpiar la sesión si no hay token válido
+  res.status(401).json({ error: 'No autenticado' });
+};
+
+module.exports = { loginAdmin, register, login, me };
