@@ -1,0 +1,8 @@
+node_modules/
+.env
+dist/
+.DS_Store
+*.log
+frontend/dist/
+backend/uploads/products/productos/
+backend/uploads/products/categorias/

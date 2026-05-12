@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOID — Streetwear SS25</title>
+<meta name="description" content="Streetwear sin concesiones. Piezas construidas para resistir — diseño que trasciende temporadas. Drops limitados SS25.">
+<!-- Open Graph -->
+<meta property="og:title" content="VOID — Streetwear SS25">
+<meta property="og:description" content="Streetwear sin concesiones. Piezas construidas para resistir — diseño que trasciende temporadas. Drops limitados SS25.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1200&q=85">
+<meta property="og:url" content="https://void-streetwear.com">
+<meta property="og:site_name" content="VOID Streetwear">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin-panel.css">
+<link rel="stylesheet" href="/src/css/main.css">
+<script src="https://js.stripe.com/v3/"></script>
+<script type="module" src="/src/ts/main.ts"></script>
+</head>
+<body>
+
+<!-- ══ AUTH MODAL ══ -->
+<div class="auth-overlay" id="authOverlay" onclick="closeAuth()"></div>
+<div class="auth-modal" id="authModal" role="dialog" aria-modal="true" aria-label="Acceso a cuenta">
+  <div class="auth-bar"></div>
+  <div class="auth-body">
+    <button class="auth-close" onclick="closeAuth()" aria-label="Cerrar">✕</button>
+    <p class="auth-eyebrow" id="authEyebrow">Acceso</p>
+    <h2 class="auth-title" id="authTitle">ENTRA<br>AL <span style="color:var(--accent)">VOID.</span></h2>
+    <p class="auth-sub" id="authSub">Inicia sesión para guardar favoritos, acceder a tu carrito y drops exclusivos.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Iniciar sesión</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Registrarse</button>
+    </div>
+    <!-- LOGIN FORM -->
+    <div id="formLogin">
+      <div class="auth-form">
+        <div class="auth-field">
+          <label class="auth-label" for="loginEmail">Email</label>
+          <input class="auth-input" type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email">
+          <span class="auth-error" id="loginEmailErr">Email no válido</span>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="loginPass">Contraseña</label>
+          <input class="auth-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+          <span class="auth-error" id="loginPassErr">Contraseña incorrecta</span>
+        </div>
+        <button class="auth-btn" onclick="submitLogin()"><span>Entrar →</span></button>
+      </div>
+      <p class="auth-switch">¿No tienes cuenta? <a onclick="switchAuthTab('register')">Regístrate gratis</a></p>
+    </div>
+    <!-- REGISTER FORM -->
+    <div id="formRegister" style="display:none">
+      <div class="auth-form">
+        <div class="auth-field">
+          <label class="auth-label" for="regName">Nombre</label>
+          <input class="auth-input" type="text" id="regName" placeholder="Tu nombre" autocomplete="name">
+          <span class="auth-error" id="regNameErr">Introduce tu nombre</span>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="regEmail">Email</label>
+          <input class="auth-input" type="email" id="regEmail" placeholder="tu@email.com" autocomplete="email">
+          <span class="auth-error" id="regEmailErr">Email no válido o ya registrado</span>
+        </div>
+        <div class="auth-field">
+          <label class="auth-label" for="regPass">Contraseña</label>
+          <input class="auth-input" type="password" id="regPass" placeholder="Mín. 6 caracteres" autocomplete="new-password">
+          <span class="auth-error" id="regPassErr">Mínimo 6 caracteres</span>
+        </div>
+        <button class="auth-btn" onclick="submitRegister()"><span>Crear cuenta →</span></button>
+      </div>
+      <p class="auth-switch">¿Ya tienes cuenta? <a onclick="switchAuthTab('login')">Inicia sesión</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="ld-logo">VOID</div>
+  <div class="ld-sub">Streetwear SS25</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- Cursors -->
+<div id="cur"></div>
+<div id="curring"></div>
+
+<!-- Toast -->
+<!-- ══ CHECKOUT MODAL ══ -->
+<div id="chkModal" role="dialog" aria-modal="true" aria-label="Pasarela de pago">
+  <div class="chk-container">
+    <button class="chk-close" onclick="closeCheckout()" aria-label="Cerrar">✕</button>
+    <div class="chk-header">
+      <div class="chk-steps"></div>
+      <div class="chk-title"></div>
+    </div>
+    <div class="chk-body"></div>
+    <div class="chk-foot"></div>
+  </div>
+</div>
+
+<!-- ══ RECIBO MODAL ══ -->
+<div id="receiptModal" role="dialog" aria-modal="true" aria-label="Confirmación de pedido"></div>
+
+<!-- ══ PARTÍCULAS ══ -->
+<div id="successParticles"></div>
+
+<div class="toast" id="toast">><span class="toast-dot"></span><span id="toastMsg">AÑADIDO AL CARRITO</span></div>
+
+<!-- ══ POPUP 1: NEWSLETTER ENTRY ══ -->
+<div class="nl-popup-overlay" id="nlPopupOverlay" onclick="closeNlPopup()"></div>
+<div class="nl-popup" id="nlPopup">
+  <div class="nl-popup-top"></div>
+  <div class="nl-popup-body">
+    <button class="nl-popup-close" onclick="closeNlPopup()" aria-label="Cerrar oferta newsletter">✕</button>
+    <p class="nl-popup-tag">Oferta exclusiva</p>
+    <h2 class="nl-popup-title">−15% EN<br>TU <span>PRIMER</span><br>PEDIDO</h2>
+    <p class="nl-popup-sub">Únete a la comunidad VOID y recibe acceso anticipado a drops limitados, descuentos y contenido exclusivo.</p>
+    <form class="nl-popup-form" onsubmit="submitNlPopup(event)">
+      <input class="nl-popup-input" type="email" id="nlPopupEmail" placeholder="tu@email.com">
+      <button class="nl-popup-btn" type="submit">QUIERO EL −15%</button>
+    </form>
+    <button class="nl-popup-skip" onclick="closeNlPopup()">No gracias, prefiero pagar precio completo →</button>
+    <div class="nl-popup-perk"><span>✓</span> Sin spam · Solo drops y ofertas reales</div>
+  </div>
+</div>
+
+<!-- ══ POPUP 2: EXIT INTENT ══ -->
+<div class="exit-overlay" id="exitOverlay" onclick="closeExit()"></div>
+<div class="exit-popup" id="exitPopup">
+  <button class="exit-close" onclick="closeExit()" aria-label="Cerrar popup de descuento">✕</button>
+  <span class="exit-emoji">👀</span>
+  <h2 class="exit-title">¿YA <span>TE VAS?</span></h2>
+  <p class="exit-sub">Espera. Antes de irte, toma este código exclusivo de descuento. Solo válido hoy.</p>
+  <div class="exit-code">VOID10</div>
+  <button class="exit-cta" onclick="applyDiscount()">USAR DESCUENTO AHORA →</button>
+  <button class="exit-skip" onclick="closeExit()">No, me voy sin el descuento</button>
+</div>
+
+<!-- ══ POPUP 3: COOKIE ══ -->
+<div class="cookie-bar" id="cookieBar">
+  <p class="cookie-text">Usamos cookies para mejorar tu experiencia, analizar el tráfico y personalizar contenido. Al continuar, aceptas nuestra <a href="#">política de cookies</a>.</p>
+  <div class="cookie-btns">
+    <button class="cookie-accept" onclick="acceptCookies()">Aceptar todo</button>
+    <button class="cookie-decline" onclick="declineCookies()">Solo esenciales</button>
+  </div>
+</div>
+
+<!-- ══ POPUP 4: SIZE GUIDE ══ -->
+<div class="sg-overlay" id="sgOverlay" onclick="closeSg()"></div>
+<div class="sg-popup" id="sgPopup">
+  <div class="sg-head">
+    <h3>GUÍA DE TALLAS</h3>
+    <button class="sg-close" onclick="closeSg()">✕</button>
+  </div>
+  <div class="sg-body">
+    <table class="sg-table">
+      <thead><tr><th>Talla</th><th>Pecho (cm)</th><th>Cintura (cm)</th><th>Caderas (cm)</th></tr></thead>
+      <tbody>
+        <tr><td>XS</td><td>84–88</td><td>68–72</td><td>88–92</td></tr>
+        <tr><td>S</td><td>88–92</td><td>72–76</td><td>92–96</td></tr>
+        <tr><td>M</td><td>92–98</td><td>76–82</td><td>96–102</td></tr>
+        <tr><td>L</td><td>98–104</td><td>82–88</td><td>102–108</td></tr>
+        <tr><td>XL</td><td>104–112</td><td>88–96</td><td>108–116</td></tr>
+        <tr><td>XXL</td><td>112–120</td><td>96–104</td><td>116–124</td></tr>
+      </tbody>
+    </table>
+    <p class="sg-note">Las prendas VOID tienen un corte oversized. Si buscas un fit más ajustado, elige una talla menos. Medidas tomadas con ropa interior ligera.</p>
+  </div>
+</div>
+
+<!-- ══ CART ══ -->
+<div class="co" id="co" onclick="closeCart()"></div>
+<div class="cd" id="cd">
+  <div class="cd-head"><h3>CARRITO</h3><button class="cd-close" onclick="closeCart()" aria-label="Cerrar carrito">✕</button></div>
+  <div class="cd-items" id="cdItems">
+    <p style="font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.2em;text-align:center;margin-top:3rem;text-transform:uppercase;">— vacío —</p>
+  </div>
+  <div class="cd-foot">
+    <div class="cd-total"><span>Total</span><span class="cd-total-amt" id="cdTotal">0,00 €</span></div>
+    <button class="chk-btn" onclick="openCheckout()"><span>Finalizar compra →</span></button>
+  </div>
+</div>
+
+<!-- ══ PRODUCT DETAIL POPUP ══ -->
+<div class="popup-overlay" id="pdOverlay" onclick="closePd()" style="z-index: 99998;"></div>
+<div class="popup-box" id="pdBox" style="z-index: 99999;">
+  <div class="popup-inner">
+    <!-- Gallery -->
+    <div class="popup-gallery">
+      <div class="popup-main-img-wrap">
+        <img id="pdImg" class="popup-img" src="" alt="">
+        <span id="pdBadge" class="popup-badge b-new"></span>
+        <button class="popup-close" onclick="closePd()" aria-label="Cerrar detalle de producto">✕</button>
+      </div>
+      <div class="popup-thumbs" id="pdThumbs"></div>
+    </div>
+    <!-- Content -->
+    <div class="popup-content">
+      <div>
+        <p class="popup-tag" id="pdTag">VOID / SS25</p>
+        <h2 class="popup-name" id="pdName"></h2>
+        <p class="popup-sub" id="pdSub"></p>
+        <div class="popup-price" id="pdPrice"></div>
+        
+        <!-- Color Variants -->
+        <div id="pdColors" class="pd-colors"></div>
+
+        <div class="popup-size-label">
+          <span>Selecciona talla</span>
+          <button class="size-guide-trigger" onclick="toggleSizeGuide()"><span>📐 Size Guide</span></button>
+        </div>
+        <!-- Inline Size Guide Panel -->
+        <div class="size-guide-panel" id="pdSizeGuide">
+          <table>
+            <thead><tr><th>Talla</th><th>Pecho</th><th>Cintura</th><th>Cadera</th></tr></thead>
+            <tbody>
+              <tr><td>S</td><td>88–92 cm</td><td>72–76 cm</td><td>92–96 cm</td></tr>
+              <tr><td>M</td><td>92–98 cm</td><td>76–82 cm</td><td>96–102 cm</td></tr>
+              <tr><td>L</td><td>98–104 cm</td><td>82–88 cm</td><td>102–108 cm</td></tr>
+              <tr><td>XL</td><td>104–112 cm</td><td>88–96 cm</td><td>108–116 cm</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="popup-sizes" id="pdSizes"></div>
+      </div>
+      <div>
+        <button class="popup-add" onclick="pdAddCart()"><span>+ Añadir al carrito</span></button>
+        <button class="popup-wish" onclick="pdWish()">♡ Guardar en wishlist</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span>VOID STREETWEAR</span><span>✦ NUEVA COL. SS25</span><span>✦ ENVÍO GRATIS +100€</span><span>✦ DROP LIMITADO</span><span>✦ 30 DÍAS DEVOLUCIÓN</span><span>✦ PREMIUM QUALITY</span>
+    <span>VOID STREETWEAR</span><span>✦ NUEVA COL. SS25</span><span>✦ ENVÍO GRATIS +100€</span><span>✦ DROP LIMITADO</span><span>✦ 30 DÍAS DEVOLUCIÓN</span><span>✦ PREMIUM QUALITY</span>
+  </div>
+</div>
+
+<nav id="mainNav">
+  <ul class="nav-left">
+    <li><a href="#newArrivals">Drops</a></li>
+    <li><a href="#products">Colección</a></li>
+    <li><a href="#cats">Categorías</a></li>
+    <li><a href="#about">Nosotros</a></li>
+  </ul>
+  
+  <a href="#" class="nav-logo">VOID</a>
+  
+  <div class="nav-right">
+    <button class="nav-btn" id="navLoginBtn" onclick="openAuth('login')" aria-label="Mi cuenta">MI CUENTA</button>
+    <button class="nav-user-btn" id="navUserBtn" onclick="toggleUserPanel()" aria-label="Panel de usuario">
+      <span id="navUserName">USER</span>
+      <div class="nav-user-dot"></div>
+    </button>
+    <button class="nav-btn" onclick="openCart()" aria-label="Ver carrito">
+      CART <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <button class="menu-trigger" onclick="toggleMenu()" aria-label="Abrir menú móvil">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- ══ USER PANEL ══ -->
+<div class="user-panel-overlay" id="userPanelOverlay" onclick="closeUserPanel()"></div>
+<div class="user-panel" id="userPanel">
+  <div class="user-panel-header">
+    <div class="user-avatar" id="userPanelAvatar">U</div>
+    <div class="user-info">
+      <div class="user-name" id="userPanelName">Usuario</div>
+      <div class="user-email" id="userPanelEmail">usuario@email.com</div>
+    </div>
+    <button class="user-panel-close" onclick="closeUserPanel()" aria-label="Cerrar panel">✕</button>
+  </div>
+  <div class="user-panel-body">
+    <div class="user-menu-section-title">Cuenta</div>
+    <a href="#" class="user-menu-item" onclick="showToast('✓ PRÓXIMAMENTE');closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>Mi Perfil</span>
+    </a>
+    <a href="#" class="user-menu-item" onclick="openOrders();closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"></path><path d="M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+      <span>Mis Pedidos</span>
+      <span class="badge" id="userOrdersCount">2</span>
+    </a>
+    <a href="#" class="user-menu-item" onclick="openWishlist();closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg>
+      <span>Wishlist</span>
+      <span class="badge" id="userWishCount">0</span>
+    </a>
+    
+    <div class="user-menu-divider"></div>
+    <div class="user-menu-section-title">Actividad</div>
+    <a href="#" class="user-menu-item" onclick="showToast('✓ PRÓXIMAMENTE');closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span>Historial</span>
+    </a>
+    <a href="#" class="user-menu-item" onclick="showToast('✓ PRÓXIMAMENTE');closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+      <span>Cupones</span>
+    </a>
+    
+    <div class="user-menu-divider"></div>
+    <div class="user-menu-section-title">Configuración</div>
+    <a href="#" class="user-menu-item" onclick="showToast('✓ PRÓXIMAMENTE');closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
+      <span>Ajustes</span>
+    </a>
+    <a href="#" class="user-menu-item" onclick="showToast('✓ PRÓXIMAMENTE');closeUserPanel();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+      <span>Tema Oscuro</span>
+    </a>
+  </div>
+  <div class="user-panel-footer">
+    <button class="user-logout-btn" onclick="logoutUserPanel()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><polyline points="21 12 9 12"></polyline></svg>
+      CERRAR SESIÓN
+    </button>
+  </div>
+</div>
+
+<!-- ORDERS MODAL -->
+<div class="popup-overlay" id="ordersOverlay" onclick="closeOrders()"></div>
+<div class="popup-box" id="ordersBox" style="max-width:720px;">
+  <div class="popup-content" style="width:100%;padding:2rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="popup-name" style="font-size:1.8rem;">MIS PEDIDOS</h2>
+      <button class="popup-close" onclick="closeOrders()">✕</button>
+    </div>
+    <div id="ordersList">
+      <div class="order-item" style="border:1px solid var(--gray2);padding:1rem;margin-bottom:.75rem;background:var(--black);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;">
+          <span style="font-family:var(--fm);font-size:9px;letter-spacing:.15em;color:var(--muted);">ORD-001</span>
+          <span style="font-family:var(--fm);font-size:9px;letter-spacing:.15em;color:var(--lime);">ENTREGADO</span>
+        </div>
+        <div style="font-size:12px;color:var(--white);margin-bottom:.25rem;">Hoodie OVERSIZED Black</div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:10px;color:var(--muted);">15 Abr 2025</span>
+          <span style="font-family:var(--fm);font-size:11px;font-weight:700;">89,00 €</span>
+        </div>
+      </div>
+      <div class="order-item" style="border:1px solid var(--gray2);padding:1rem;background:var(--black);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;">
+          <span style="font-family:var(--fm);font-size:9px;letter-spacing:.15em;color:var(--muted);">ORD-002</span>
+          <span style="font-family:var(--fm);font-size:9px;letter-spacing:.15em;color:var(--accent);">EN CAMINO</span>
+        </div>
+        <div style="font-size:12px;color:var(--white);margin-bottom:.25rem;">Tee Essential White + Cazadora Bomber</div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-size:10px;color:var(--muted);">18 Abr 2025</span>
+          <span style="font-family:var(--fm);font-size:11px;font-weight:700;">134,00 €</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WISHLIST MODAL -->
+<div class="popup-overlay" id="wishlistOverlay" onclick="closeWishlist()"></div>
+<div class="popup-box" id="wishlistBox" style="max-width:720px;">
+  <div class="popup-content" style="width:100%;padding:2rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 class="popup-name" style="font-size:1.8rem;">MI WISHLIST</h2>
+      <button class="popup-close" onclick="closeWishlist()">✕</button>
+    </div>
+    <div id="wishlistItems">
+      <p style="font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.2em;text-align:center;margin-top:3rem;text-transform:uppercase;">— tu wishlist está vacía —</p>
+    </div>
+  </div>
+</div>
+
+<!-- ALL PRODUCTS MODAL -->
+<div class="popup-overlay" id="allProductsOverlay" onclick="closeAllProductsModal()"></div>
+<div class="popup-box-full" id="allProductsBox">
+  <button class="modal-close-btn" onclick="closeAllProductsModal()" aria-label="Cerrar catálogo">✕</button>
+  
+  <header class="modal-header">
+    <div class="modal-header-top">
+      <div class="sec-title-wrap">
+        <span class="sec-meta">// CATÁLOGO COMPLETO</span>
+        <h2 class="sec-title">TODOS LOS <em>PRODUCTOS</em></h2>
+      </div>
+    </div>
+    
+    <div class="modal-tools">
+      <div class="modal-search-wrap">
+        <span class="modal-search-icon">🔍</span>
+        <input type="text" class="modal-search" id="modalSearch" placeholder="Buscar productos..." oninput="applyModalFilters()">
+      </div>
+      
+      <div class="modal-filters">
+        <button class="mf-btn active" onclick="filterModal(this, 'all')">Todo</button>
+        <button class="mf-btn" onclick="filterModal(this, 'hoodies')">Hoodies</button>
+        <button class="mf-btn" onclick="filterModal(this, 'tees')">Tees</button>
+        <button class="mf-btn" onclick="filterModal(this, 'jackets')">Cazadoras</button>
+        <button class="mf-btn" onclick="filterModal(this, 'sneakers')">Zapatillas</button>
+      </div>
+      
+      <div class="modal-sort-wrap">
+        <select class="modal-sort" id="modalSort" onchange="applyModalFilters()">
+          <option value="newest">Más recientes</option>
+          <option value="price-low">Precio: Menor a mayor</option>
+          <option value="price-high">Precio: Mayor a menor</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="modal-count" id="modalCount">0 PRODUCTOS ENCONTRADOS</div>
+  </header>
+
+  <div class="modal-body">
+    <div class="pgrid expanded" id="modalGrid"></div>
+  </div>
+</div>
+
+
+<div class="mob-menu" id="mobMenu">
+  <a href="#newArrivals" onclick="toggleMenu()">Drops</a>
+  <a href="#products" onclick="toggleMenu()">Colección</a>
+  <a href="#cats" onclick="toggleMenu()">Categorías</a>
+  <a href="#about" onclick="toggleMenu()">Nosotros</a>
+  <button class="mob-cart-btn" onclick="toggleMenu();openCart()">Carrito (<span id="ccM">0</span>)</button>
+  <button class="mob-cart-btn" id="mobAuthBtn" onclick="toggleMenu();openAuth('login')" style="background:none;border:1px solid rgba(255,255,255,.15);color:var(--muted);margin-top:-.5rem;">Iniciar sesión</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div>
+      <p class="hero-eyebrow">SS25 — DROP 001 <span class="blink">_</span></p>
+      <h1 class="hero-title">
+        <span class="line"><span class="inner stroke" id="heroWord">DEFINE</span></span>
+        <span class="line"><span class="inner">TU</span></span>
+        <span class="line"><span class="inner red">VOID.</span></span>
+      </h1>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-desc">Piezas construidas para resistir. Diseño sin concesiones. Estética que trasciende temporadas.</p>
+      <a href="#products" class="hero-cta"><span class="hci">Explorar →</span></a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <img class="hero-img" id="heroImg" src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?w=900&q=80" alt="VOID SS25">
+    <div class="hero-scan"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-overlay"></div>
+    <span class="hero-badge">NEW DROP ↗</span>
+    <div class="hero-counter">
+      <span>Piezas restantes</span>
+      <strong id="heroCount">47</strong>
+    </div>
+    <span class="hero-label">VOID / SS25 / 001</span>
+  </div>
+</section>
+<div class="hero-gradient-bar"></div>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="mtrack">
+    <span class="mi">STREETWEAR</span><span class="mi hl">★</span><span class="mi">VOID</span><span class="mi hl">★</span><span class="mi">AUTHENTIC</span><span class="mi hl">★</span><span class="mi">LIMITED</span><span class="mi hl">★</span><span class="mi">SS25</span><span class="mi hl">★</span><span class="mi">NO RULES</span><span class="mi hl">★</span>
+    <span class="mi">STREETWEAR</span><span class="mi hl">★</span><span class="mi">VOID</span><span class="mi hl">★</span><span class="mi">AUTHENTIC</span><span class="mi hl">★</span><span class="mi">LIMITED</span><span class="mi hl">★</span><span class="mi">SS25</span><span class="mi hl">★</span><span class="mi">NO RULES</span><span class="mi hl">★</span>
+  </div>
+</div>
+<div class="marquee marquee2" style="margin-top:-1px;">
+  <div class="mtrack rev">
+    <span class="mi">OVERSIZED</span><span class="mi hl">✦</span><span class="mi">PREMIUM</span><span class="mi hl">✦</span><span class="mi">URBAN</span><span class="mi hl2">✦</span><span class="mi">CULTURE</span><span class="mi hl">✦</span><span class="mi">MADE FOR</span><span class="mi hl2">✦</span><span class="mi">THE STREETS</span><span class="mi hl">✦</span>
+    <span class="mi">OVERSIZED</span><span class="mi hl">✦</span><span class="mi">PREMIUM</span><span class="mi hl">✦</span><span class="mi">URBAN</span><span class="mi hl2">✦</span><span class="mi">CULTURE</span><span class="mi hl">✦</span><span class="mi">MADE FOR</span><span class="mi hl2">✦</span><span class="mi">THE STREETS</span><span class="mi hl">✦</span>
+  </div>
+</div>
+
+<!-- BEST SELLERS -->
+<div id="bestSellers" style="margin-top:2rem;">
+  <div class="sec-head reveal">
+    <div class="sec-title-wrap">
+      <span class="sec-meta">// LOS MÁS BUSCADOS</span>
+      <h2 class="sec-title">BEST <em>SELLERS</em></h2>
+    </div>
+  </div>
+  <div class="pgrid" id="bsGrid"></div>
+</div>
+
+<!-- NEW ARRIVALS -->
+<div id="newArrivals">
+  <div class="sec-head reveal">
+    <div class="sec-title-wrap">
+      <span class="sec-meta">// ÚLTIMO DROP</span>
+      <h2 class="sec-title" style="color:var(--lime);">NEW <em>ARRIVALS</em></h2>
+    </div>
+  </div>
+  <div class="pgrid" id="naGrid"></div>
+</div>
+
+<!-- ALL PRODUCTS CAROUSEL -->
+<div id="products">
+  <div class="sec-head reveal" style="align-items:flex-end;">
+    <div class="sec-title-wrap">
+      <span class="sec-meta">// CATÁLOGO SS25</span>
+      <h2 class="sec-title">COLECCIÓN <em>COMPLETA</em></h2>
+    </div>
+    <button class="hero-cta" onclick="openAllProductsModal()"><span class="hci">VER TODO ↗</span></button>
+  </div>
+  
+  
+  <div class="carousel-container" style="position:relative;">
+    <button class="car-arrow prev" onclick="scrollCar(-1)" aria-label="Anterior">←</button>
+    <div class="pgrid carousel-view" id="pgrid-carousel"></div>
+    <button class="car-arrow next" onclick="scrollCar(1)" aria-label="Siguiente">→</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-band reveal">
+  <div class="stat"><div class="stat-num" data-to="47">0</div><div class="stat-label">Drops lanzados</div></div>
+  <div class="stat"><div class="stat-num" data-to="12800">0</div><div class="stat-label">Clientes globales</div></div>
+  <div class="stat"><div class="stat-num" data-to="100">0</div><div class="stat-label">% Materiales premium</div></div>
+  <div class="stat"><div class="stat-num" data-to="48">0</div><div class="stat-label">Horas de entrega</div></div>
+</div>
+
+
+<!-- CATS -->
+<div id="cats">
+  <div class="sec-head reveal"><h2 class="sec-title">CATEGORÍAS</h2><span class="sec-meta">Explorar todo</span></div>
+  <div class="cats">
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(2)'),'hoodies'), 50); return false;">
+      <div class="cat-bg" style="background-image:url('http://localhost:3000/uploads/products/categorias/hoodies.jpg')"></div>
+      <span class="cat-num">01</span><span class="cat-name">HOODIES</span><span class="cat-count">5 piezas</span><span class="cat-arrow">→</span>
+    </a>
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(3)'),'tees'), 50); return false;">
+      <div class="cat-bg" style="background-image:url('http://localhost:3000/uploads/products/categorias/tees.jpg')"></div>
+      <span class="cat-num">02</span><span class="cat-name">TEES</span><span class="cat-count">5 piezas</span><span class="cat-arrow">→</span>
+    </a>
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(4)'),'jackets'), 50); return false;">
+      <div class="cat-bg" style="background-image:url('http://localhost:3000/uploads/products/categorias/cazadoras.jpg')"></div>
+      <span class="cat-num">03</span><span class="cat-name">CAZADORAS</span><span class="cat-count">2 piezas</span><span class="cat-arrow">→</span>
+    </a>
+    <a href="#" class="cat reveal" onclick="openAllProductsModal(); setTimeout(() => filterModal(document.querySelector('#allProductsBox .mf-btn:nth-child(5)'),'sneakers'), 50); return false;">
+      <div class="cat-bg" style="background-image:url('http://localhost:3000/uploads/products/categorias/zapatillas.jpg')"></div>
+      <span class="cat-num">04</span><span class="cat-name">ZAPATILLAS</span><span class="cat-count">5 piezas</span><span class="cat-arrow">→</span>
+    </a>
+  </div>
+
+</div>
+
+<!-- NL -->
+<div class="nl reveal">
+  <div class="nl-left">
+    <span class="nl-tag">// Comunidad</span>
+    <h2 class="nl-title">FIRST<br><span>TO KNOW.</span></h2>
+    <p class="nl-desc">Drops exclusivos, early access y descuentos solo para la comunidad.</p>
+  </div>
+  <form class="nl-form" onsubmit="subscribeSec(event)">
+    <input class="nl-input" type="email" placeholder="tu@email.com" id="nlSecEmail">
+    <button class="nl-submit" type="submit">Suscribirse</button>
+  </form>
+</div>
+
+<!-- FOOTER -->
+<footer id="about">
+  <div class="footer-brand">
+    <a href="#" class="nav-logo">VOID</a>
+    <p class="footer-tagline">Streetwear sin concesiones para los que no siguen el juego. Desde 2024.</p>
+    <div class="footer-social">
+      <a href="#" class="social-link">ig</a>
+      <a href="#" class="social-link">tk</a>
+      <a href="#" class="social-link">tw</a>
+      <a href="#" class="social-link">yt</a>
+    </div>
+  </div>
+  <div class="fc"><h4>Tienda</h4><ul><li><a href="#">Novedades</a></li><li><a href="#">Hoodies</a></li><li><a href="#">Tees</a></li><li><a href="#">Cazadoras</a></li><li><a href="#">Zapatillas</a></li></ul></div>
+  <div class="fc"><h4>Ayuda</h4><ul><li><a href="#">Envíos</a></li><li><a href="#">Devoluciones</a></li><li><a href="#" onclick="openSg();return false;">Guía de tallas</a></li><li><a href="#">Contacto</a></li></ul></div>
+  <div class="fc"><h4>Marca</h4><ul><li><a href="#">Sobre VOID</a></li><li><a href="#">Instagram</a></li><li><a href="#">TikTok</a></li><li><a href="#">Prensa</a></li></ul></div>
+</footer>
+<div class="footer-bottom"><span>© 2025 VOID Streetwear</span><span>Diseñado con brutalidad absoluta</span></div>
+
+<!-- FOOTER LEGAL -->
+<div class="footer-legal">
+  <ul class="footer-legal-links">
+    <li><a href="#">Privacy Policy</a></li>
+    <li><a href="#">Returns</a></li>
+    <li><a href="#">Terms of Service</a></li>
+  </ul>
+  <!-- Admin Button Trigger -->
+  <button class="admin-btn-trigger" onclick="openAdminLogin()" aria-label="Admin Access" title="Admin">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+    </svg>
+  </button>
+  <div class="footer-payment-icons" aria-label="Métodos de pago aceptados">
+    <!-- Visa -->
+    <div class="pay-icon" aria-label="Visa">
+      <svg width="46" height="28" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <rect width="46" height="28" rx="4" fill="none" stroke="rgba(240,237,232,0.3)" stroke-width="1"/>
+        <text x="8" y="19" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="var(--white)" letter-spacing="0">VISA</text>
+      </svg>
+    </div>
+    <!-- Mastercard -->
+    <div class="pay-icon" aria-label="Mastercard">
+      <svg width="46" height="28" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <rect width="46" height="28" rx="4" fill="none" stroke="rgba(240,237,232,0.3)" stroke-width="1"/>
+        <circle cx="17" cy="14" r="7" fill="var(--white)" fill-opacity="0.9"/>
+        <circle cx="29" cy="14" r="7" fill="var(--white)" fill-opacity="0.6"/>
+      </svg>
+    </div>
+    <!-- Amex -->
+    <div class="pay-icon" aria-label="American Express">
+      <svg width="46" height="28" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <rect width="46" height="28" rx="4" fill="none" stroke="rgba(240,237,232,0.3)" stroke-width="1"/>
+        <text x="5" y="19" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="var(--white)" letter-spacing="0.5">AMEX</text>
+      </svg>
+    </div>
+    <!-- PayPal -->
+    <div class="pay-icon" aria-label="PayPal">
+      <svg width="46" height="28" viewBox="0 0 46 28" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+        <rect width="46" height="28" rx="4" fill="none" stroke="rgba(240,237,232,0.3)" stroke-width="1"/>
+        <text x="4" y="12" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="var(--white)" letter-spacing="0">Pay</text>
+        <text x="4" y="22" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" fill="var(--white)" fill-opacity="0.6" letter-spacing="0">Pal</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+
+
+
+</body>
+</html>
+
+
