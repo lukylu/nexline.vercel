@@ -7,8 +7,11 @@ import { showToast, colorMap } from './utils';
 import { switchAuthTab, logoutUser } from './auth';
 
 export function openPd(id: string | number) {
-  const p = cachedProducts.find(x => x.id === id);
-  if (!p) return;
+  const p = cachedProducts.find(x => x.id.toString() === id.toString());
+  if (!p) {
+    console.warn('Producto no encontrado en cachedProducts para ID:', id);
+    return;
+  }
   
   state.setPdCurrentId(id);
   state.setPdSelectedSize(null);
