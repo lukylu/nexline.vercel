@@ -1,4 +1,5 @@
 node_modules/
+<<<<<<< HEAD
 .env
 dist/
 .DS_Store
@@ -6,3 +7,10 @@ dist/
 frontend/dist/
 backend/uploads/products/productos/
 backend/uploads/products/categorias/
+=======
+dist/
+.env
+*.db
+.DS_Store
+*.log
+>>>>>>> 8672a71d66730a7f8b0305e0223f162bcc669f19
